@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Http.Connections.Internal
         /// Creates the DefaultConnectionContext without Pipes to avoid upfront allocations.
         /// The caller is expected to set the <see cref="Transport"/> and <see cref="Application"/> pipes manually.
         /// </summary>
-        public HttpConnectionContext(string connectionId, string connectionToken, ILogger logger, IDuplexPipe transport, IDuplexPipe application, HttpConnectionDispatcherOptions options)
+        public HttpConnectionContext(string connectionId, string connectionToken, ILogger logger, IDuplexPipe transport, IDuplexPipe application, HttpConnectionDispatcherOptions? options = null)
         {
             Transport = transport;
             _applicationStream = new PipeWriterStream(application.Output);
@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Http.Connections.Internal
             ConnectionId = connectionId;
             ConnectionToken = connectionToken;
             LastSeenUtc = DateTime.UtcNow;
-            _options = options;
+            _options = options ?? new();
 
             // The default behavior is that both formats are supported.
             SupportedFormats = TransferFormat.Binary | TransferFormat.Text;
