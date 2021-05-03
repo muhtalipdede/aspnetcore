@@ -570,6 +570,8 @@ namespace Microsoft.AspNetCore.Http.Connections.Internal
                     if (currentTicks - _startedSendTime > _options.TransportSendTimeoutTicks)
                     {
                         _sendCts!.Cancel();
+
+                        Log.TransportSendTimeout(_logger, _options.TransportSendTimeout, ConnectionId);
                     }
                 }
             }
@@ -607,6 +609,9 @@ namespace Microsoft.AspNetCore.Http.Connections.Internal
 
             private static readonly Action<ILogger, HttpTransportType, Exception?> _transportAndApplicationComplete =
                 LoggerMessage.Define<HttpTransportType>(LogLevel.Trace, new EventId(8, "TransportAndApplicationComplete"), "The application and {TransportType} transport are both complete.");
+
+            private static readonly Action<ILogger, int, string, Exception?> _transportSendtimeout =
+                LoggerMessage.Define<int, string>(LogLevel.Trace, new EventId(9, "TransportSendTimeout"), "({Timeout}ms) elapsed attempting to send a message to the transport. Closing connection {TransportConnectionId}.");
 
             public static void DisposingConnection(ILogger logger, string connectionId)
             {
@@ -686,6 +691,11 @@ namespace Microsoft.AspNetCore.Http.Connections.Internal
                 }
 
                 _transportAndApplicationComplete(logger, transportType, null);
+            }
+
+            public static void TransportSendTimeout(ILogger logger, TimeSpan transportTimeout, string connectionId)
+            {
+                _transportSendtimeout(logger, (int)transportTimeout.TotalMilliseconds, connectionId, null);
             }
         }
     }
